@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2024 리제 생일 후원자 명단</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 10px;
+            font-family: Arial, sans-serif;
+        }
+        .sponsor-section {
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        .sponsor-image {
+            width: 100%;
+            height: 400px;
+            background-color: #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 20px;
+            border-radius: 20px;
+        }
+        .search-container {
+            display: flex;
+            padding: 10px;
+            margin-bottom: 20px;
+        }
+        #searchInput {
+            flex-grow: 1;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px 0 0 4px;
+            transition: all 0.3s;
+        }
+        #searchInput:focus {
+            border-color: #4a90e2;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+        }
+        #searchButton {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 0 4px 4px 0;
+            cursor: pointer;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        td {
+            text-align: center;
+            padding: 12px;
+            white-space: nowrap;
+        }
+        .highlight {
+            background-color: yellow;
+        }
+        #notification {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 5px;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+        #resultNavigation {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            display: none;
+        }
+        #resultNavigation button {
+            margin: 0 5px;
+            padding: 5px 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+<header>
+
+</header>
+<main>
+    <div class="sponsor-section">
+        <div class="sponsor-image">사진 1</div>
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="닉네임으로 검색...">
+            <button id="searchButton">검색</button>
+        </div>
+        <table class="sponsor-table">
+            <tr>
+                <td>홍길동</td>
+                <td>홍길동</td>
+                <td>홍길동</td>
+            </tr>
+            <tr>
+                <td>김철수</td>
+                <td>김철수</td>
+                <td>김철수</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="sponsor-section">
+        <div class="sponsor-image">사진 2</div>
+        <table class="sponsor-table">
+            <tr>
+                <td>홍길동</td>
+                <td>홍길동</td>
+                <td>홍길동</td>
+            </tr>
+            <tr>
+                <td>김철수</td>
+                <td>김철수</td>
+                <td>김철수</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="sponsor-section">
+        <div class="sponsor-image">사진 3</div>
+        <table class="sponsor-table">
+            <tr>
+                <td>홍길동</td>
+                <td>홍길동</td>
+                <td>홍길동</td>
+            </tr>
+            <tr>
+                <td>김철수</td>
+                <td>김철수</td>
+                <td>김철수</td>
+            </tr>
+        </table>
+    </div>
+</main>
+<div id="notification"></div>
+<div id="resultNavigation">
+    <span id="resultCount"></span>
+    <button id="prevResult">&lt; 이전</button>
+    <button id="nextResult">다음 &gt;</button>
+</div>
+<script>
+    let currentResultIndex = 0;
+    let searchResults = [];
+
+    function showNotification(message) {
+        const notification = document.getElementById('notification');
+        notification.textContent = message;
+        notification.style.display = 'block';
+
+        setTimeout(() => {
+            notification.style.opacity = '1';
+        }, 10);
+
+        setTimeout(() => {
+            notification.style.opacity = '0';
+        }, 1500);
+
+        setTimeout(() => {
+            notification.style.display = 'none';
+        }, 2000);
+    }
+
+    function searchSponsor() {
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
+        const tables = document.getElementsByClassName('sponsor-table');
+        searchResults = [];
+        currentResultIndex = 0;
+
+        for (let t = 0; t < tables.length; t++) {
+            const cells = tables[t].getElementsByTagName('td');
+
+            for (let i = 0; i < cells.length; i++) {
+                cells[i].classList.remove('highlight');
+                const cellContent = cells[i].textContent.toLowerCase();
+                if (cellContent.includes(searchTerm)) {
+                    searchResults.push(cells[i]);
+                }
+            }
+        }
+
+        if (searchResults.length > 0) {
+            highlightResult(0);
+            showResultNavigation();
+        } else {
+            showNotification('검색 결과가 없습니다.');
+            hideResultNavigation();
+        }
+    }
+
+    function highlightResult(index) {
+        searchResults.forEach(cell => cell.classList.remove('highlight'));
+        searchResults[index].classList.add('highlight');
+        searchResults[index].scrollIntoView({behavior: 'smooth', block: 'center'});
+        updateResultCount();
+    }
+
+    function showResultNavigation() {
+        const nav = document.getElementById('resultNavigation');
+        nav.style.display = 'block';
+        updateResultCount();
+    }
+
+    function hideResultNavigation() {
+        const nav = document.getElementById('resultNavigation');
+        nav.style.display = 'none';
+    }
+
+    function updateResultCount() {
+        const countSpan = document.getElementById('resultCount');
+        countSpan.textContent = `${currentResultIndex + 1} / ${searchResults.length}`;
+    }
+
+    document.getElementById('searchButton').addEventListener('click', searchSponsor);
+
+    document.getElementById('searchInput').addEventListener('keypress', function(event) {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            searchSponsor();
+        }
+    });
+
+    document.getElementById('prevResult').addEventListener('click', function() {
+        if (searchResults.length > 0) {
+            currentResultIndex = (currentResultIndex - 1 + searchResults.length) % searchResults.length;
+            highlightResult(currentResultIndex);
+        }
+    });
+
+    document.getElementById('nextResult').addEventListener('click', function() {
+        if (searchResults.length > 0) {
+            currentResultIndex = (currentResultIndex + 1) % searchResults.length;
+            highlightResult(currentResultIndex);
+        }
+    });
+</script>
+</body>
+</html>
