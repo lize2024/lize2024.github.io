@@ -69,10 +69,18 @@
         td {
             text-align: center;
             padding: 12px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            word-wrap: break-word;
+            white-space: normal;
+            overflow: visible;
+            position: relative;
             width: 33.33%;
+            height: auto;
+            line-height: 1.2;
+        }
+        .nickname {
+            display: block;
+            word-break: break-word;
+            hyphens: auto;
         }
         .highlight {
             background-color: #FF6D87;
@@ -273,6 +281,7 @@
 
                 section.appendChild(table);
                 container.appendChild(section);
+                wrapNicknamesInSpan();
             });
 
             // 검색 기능 초기화
@@ -286,6 +295,14 @@
         } catch (error) {
             console.error('Error loading sponsors:', error);
         }
+    }
+
+    function wrapNicknamesInSpan() {
+        const cells = document.querySelectorAll('.sponsor-table td');
+        cells.forEach(cell => {
+            const nickname = cell.textContent;
+            cell.innerHTML = `<span class="nickname">${nickname}</span>`;
+        });
     }
 
     // 이전 및 다음 결과 버튼 이벤트 리스너
