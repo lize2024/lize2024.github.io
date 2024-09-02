@@ -14,19 +14,41 @@
             overflow: hidden;
             margin-bottom: 20px;
         }
-        .sponsor-image {
-            width: 100%;
-            background-color: #ddd;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            color: #666;
+        .sponsor-image-container {
             position: relative;
-            margin-bottom: 20px;
-            border-radius: 20px;
+            width: 100%;
             overflow: hidden;
+            border-radius: 20px;
+            margin-bottom: 20px;
+        }
+        .sponsor-image-slider {
+            display: flex;
+            transition: transform 0.5s ease-in-out;
+        }
+        .sponsor-image {
+            flex: 0 0 100%;
+            width: 100%;
             aspect-ratio: 16 / 9;
+        }
+        .slider-dots {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.5);
+            margin: 0 5px;
+            cursor: pointer;
+        }
+        .dot.active {
+            background-color: white;
         }
         .cover-image {
             width: 100%;
@@ -243,18 +265,42 @@
                 const section = document.createElement('div');
                 section.className = 'sponsor-section';
 
-                const imageDiv = document.createElement('div');
-                imageDiv.className = 'sponsor-image';
-                const img = document.createElement('img');
-                img.src = group.image;
-                img.alt = `사진 ${index + 1}`;
-                img.className = 'cover-image';
-                imageDiv.appendChild(img);
+                const imageContainer = document.createElement('div');
+                imageContainer.className = 'sponsor-image-container';
 
-                const table = document.createElement('table');
-                table.className = 'sponsor-table';
+                const imageSlider = document.createElement('div');
+                imageSlider.className = 'sponsor-image-slider';
 
-                // 첫 번째 그룹에만 검색 바 추가
+                const images = Array.isArray(group.image) ? group.image : [group.image];
+                images.forEach((imgSrc, imgIndex) => {
+                    const imageDiv = document.createElement('div');
+                    imageDiv.className = 'sponsor-image';
+                    const img = document.createElement('img');
+                    img.src = imgSrc;
+                    img.alt = `사진 ${index + 1}-${imgIndex + 1}`;
+                    img.className = 'cover-image';
+                    imageDiv.appendChild(img);
+                    imageSlider.appendChild(imageDiv);
+                });
+
+                imageContainer.appendChild(imageSlider);
+
+                // 이미지 인디케이터 추가
+                if (images.length > 1) {
+                    const dotContainer = document.createElement('div');
+                    dotContainer.className = 'slider-dots';
+                    images.forEach((_, dotIndex) => {
+                        const dot = document.createElement('div');
+                        dot.className = `dot ${dotIndex === 0 ? 'active' : ''}`;
+                        dot.addEventListener('click', () => moveToSlide(imageSlider, dotIndex));
+                        dotContainer.appendChild(dot);
+                    });
+                    imageContainer.appendChild(dotContainer);
+                }
+
+                section.appendChild(imageContainer);
+
+                // 첫 번째 그룹에만 검색 바 추가 (기존 코드와 동일)
                 if (index === 0) {
                     const searchContainer = document.createElement('div');
                     searchContainer.className = 'search-container';
@@ -262,13 +308,12 @@
                         <input type="text" id="searchInput" placeholder="닉네임으로 검색...">
                         <button id="searchButton">검색</button>
                     `;
-                    section.appendChild(imageDiv);
                     section.appendChild(searchContainer);
-                } else {
-                    section.appendChild(imageDiv);
                 }
 
-                // 후원자 이름을 3열로 나누어 표시
+                // 테이블 생성 (기존 코드와 동일)
+                const table = document.createElement('table');
+                table.className = 'sponsor-table';
                 for (let i = 0; i < group.sponsors.length; i += 3) {
                     const row = table.insertRow();
                     for (let j = 0; j < 3; j++) {
@@ -281,10 +326,20 @@
 
                 section.appendChild(table);
                 container.appendChild(section);
-                wrapNicknamesInSpan();
+
+                // 자동 슬라이드 설정
+                if (images.length > 1) {
+                    setInterval(() => {
+                        const currentIndex = parseInt(imageSlider.style.transform.replace('translateX(-', '').replace('%)', '')) / 100 || 0;
+                        const nextIndex = (currentIndex + 1) % images.length;
+                        moveToSlide(imageSlider, nextIndex);
+                    }, 3000);
+                }
             });
 
-            // 검색 기능 초기화
+            wrapNicknamesInSpan();
+
+            // 검색 기능 초기화 (기존 코드와 동일)
             document.getElementById('searchButton').addEventListener('click', searchSponsor);
             document.getElementById('searchInput').addEventListener('keypress', function(event) {
                 if (event.key === 'Enter') {
@@ -295,6 +350,14 @@
         } catch (error) {
             console.error('Error loading sponsors:', error);
         }
+    }
+
+    function moveToSlide(slider, index) {
+        slider.style.transform = `translateX(-${index * 100}%)`;
+        const dots = slider.parentElement.querySelectorAll('.dot');
+        dots.forEach((dot, i) => {
+            dot.classList.toggle('active', i === index);
+        });
     }
 
     function wrapNicknamesInSpan() {
