@@ -106,73 +106,38 @@
             border-radius: 3px;
             cursor: pointer;
         }
+        #topButton {
+            position: fixed;
+            bottom: 20px;
+            right: 30px;
+            z-index: 99;
+            border: none;
+            outline: none;
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 18px;
+            transition: opacity 0.3s;
+            opacity: 0;
+        }
+        #topButton:hover {
+            background-color: #45a049;
+        }
     </style>
 </head>
 <body>
 <header>
-
 </header>
-<main>
-    <div class="sponsor-section">
-        <div class="sponsor-image">
-            <img src="images/photo1.jpg" alt="사진 1" class="cover-image">
-        </div>
-        <div class="search-container">
-            <input type="text" id="searchInput" placeholder="닉네임으로 검색...">
-            <button id="searchButton">검색</button>
-        </div>
-        <table class="sponsor-table">
-            <tr>
-                <td>홍길동</td>
-                <td>홍길동</td>
-                <td>홍길동</td>
-            </tr>
-            <tr>
-                <td>김철수</td>
-                <td>김철수</td>
-                <td>김철수</td>
-            </tr>
-        </table>
-    </div>
-
-    <div class="sponsor-section">
-        <div class="sponsor-image">사진 2</div>
-        <table class="sponsor-table">
-            <tr>
-                <td>홍길동</td>
-                <td>홍길동</td>
-                <td>홍길동</td>
-            </tr>
-            <tr>
-                <td>김철수</td>
-                <td>김철수</td>
-                <td>김철수</td>
-            </tr>
-        </table>
-    </div>
-
-    <div class="sponsor-section">
-        <div class="sponsor-image">사진 3</div>
-        <table class="sponsor-table">
-            <tr>
-                <td>홍길동</td>
-                <td>홍길동</td>
-                <td>홍길동</td>
-            </tr>
-            <tr>
-                <td>김철수</td>
-                <td>김철수</td>
-                <td>김철수</td>
-            </tr>
-        </table>
-    </div>
-</main>
+<main id="sponsorContainer"></main>
 <div id="notification"></div>
 <div id="resultNavigation">
     <span id="resultCount"></span>
     <button id="prevResult">&lt; 이전</button>
     <button id="nextResult">다음 &gt;</button>
 </div>
+<button id="topButton" title="Go to top">위로</button>
 <script>
     let currentResultIndex = 0;
     let searchResults = [];
@@ -245,15 +210,70 @@
         countSpan.textContent = `${currentResultIndex + 1} / ${searchResults.length}`;
     }
 
-    document.getElementById('searchButton').addEventListener('click', searchSponsor);
+    async function loadSponsors() {
+        try {
+            const response = await fetch('sponsors.json');
+            const data = await response.json();
+            const container = document.getElementById('sponsorContainer');
 
-    document.getElementById('searchInput').addEventListener('keypress', function(event) {
-        if (event.key === 'Enter') {
-            event.preventDefault();
-            searchSponsor();
+            data.groups.forEach((group, index) => {
+                const section = document.createElement('div');
+                section.className = 'sponsor-section';
+
+                const imageDiv = document.createElement('div');
+                imageDiv.className = 'sponsor-image';
+                const img = document.createElement('img');
+                img.src = group.image;
+                img.alt = `사진 ${index + 1}`;
+                img.className = 'cover-image';
+                imageDiv.appendChild(img);
+
+                const table = document.createElement('table');
+                table.className = 'sponsor-table';
+
+                // 첫 번째 그룹에만 검색 바 추가
+                if (index === 0) {
+                    const searchContainer = document.createElement('div');
+                    searchContainer.className = 'search-container';
+                    searchContainer.innerHTML = `
+                        <input type="text" id="searchInput" placeholder="닉네임으로 검색...">
+                        <button id="searchButton">검색</button>
+                    `;
+                    section.appendChild(imageDiv);
+                    section.appendChild(searchContainer);
+                } else {
+                    section.appendChild(imageDiv);
+                }
+
+                // 후원자 이름을 3열로 나누어 표시
+                for (let i = 0; i < group.sponsors.length; i += 3) {
+                    const row = table.insertRow();
+                    for (let j = 0; j < 3; j++) {
+                        if (i + j < group.sponsors.length) {
+                            const cell = row.insertCell();
+                            cell.textContent = group.sponsors[i + j];
+                        }
+                    }
+                }
+
+                section.appendChild(table);
+                container.appendChild(section);
+            });
+
+            // 검색 기능 초기화
+            document.getElementById('searchButton').addEventListener('click', searchSponsor);
+            document.getElementById('searchInput').addEventListener('keypress', function(event) {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    searchSponsor();
+                }
+            });
+        } catch (error) {
+            console.error('Error loading sponsors:', error);
         }
-    });
+    }
 
+    // 이전 및 다음 결과 버튼 이벤트 리스너
     document.getElementById('prevResult').addEventListener('click', function() {
         if (searchResults.length > 0) {
             currentResultIndex = (currentResultIndex - 1 + searchResults.length) % searchResults.length;
@@ -266,6 +286,29 @@
             currentResultIndex = (currentResultIndex + 1) % searchResults.length;
             highlightResult(currentResultIndex);
         }
+    });
+
+    // 페이지 로드 시 후원자 데이터 불러오기
+    window.addEventListener('load', loadSponsors);
+
+    const topButton = document.getElementById("topButton");
+    
+    window.onscroll = function() {scrollFunction()};
+    
+    function scrollFunction() {
+        if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+            topButton.style.opacity = "1";
+        } else {
+            topButton.style.opacity = "0";
+        }
+    }
+
+    // 버튼 클릭 시 페이지 상단으로 스크롤
+    topButton.addEventListener("click", function() {
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
     });
 </script>
 </body>
