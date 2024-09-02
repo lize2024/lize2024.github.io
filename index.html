@@ -161,14 +161,20 @@
     }
 
     function searchSponsor() {
-        const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
+        const searchTerm = document.getElementById('searchInput').value.trim().toLowerCase();
+        
+        if (searchTerm === '') {
+            showNotification('검색어를 입력해주세요.');
+            return;
+        }
+    
         const tables = document.getElementsByClassName('sponsor-table');
         searchResults = [];
         currentResultIndex = 0;
-
+    
         for (let t = 0; t < tables.length; t++) {
             const cells = tables[t].getElementsByTagName('td');
-
+    
             for (let i = 0; i < cells.length; i++) {
                 cells[i].classList.remove('highlight');
                 const cellContent = cells[i].textContent.toLowerCase();
@@ -177,7 +183,7 @@
                 }
             }
         }
-
+    
         if (searchResults.length > 0) {
             highlightResult(0);
             showResultNavigation();
