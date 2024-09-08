@@ -144,21 +144,25 @@
         }
         .nav-buttons {
             display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
         }
         .nav-button {
-            padding: 10px 20px;
+            width: 100%;
+            padding: 15px;
             font-size: 16px;
-            background-color: #FF6D87;
-            color: white;
+            background-color: white;
+            color: black;
             border: none;
-            border-radius: 4px;
+            border-radius: 10px;
             cursor: pointer;
+            text-align: left;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             transition: background-color 0.3s;
         }
         .nav-button:hover {
-            background-color: #FF4F72;
+            background-color: #f0f0f0;
         }
     </style>
 </head>
