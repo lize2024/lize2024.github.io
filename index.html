@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>2024 리제 생일 후원자 명단</title>
     <style>
         body {
@@ -142,6 +142,24 @@
         #topButton:hover {
             background-color: #f0f0f0;
         }
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        .nav-button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #FF6D87;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .nav-button:hover {
+            background-color: #FF4F72;
+        }
     </style>
 </head>
 <body>
@@ -254,15 +272,24 @@
                 const table = document.createElement('table');
                 table.className = 'sponsor-table';
 
-                // 첫 번째 그룹에만 검색 바 추가
+                // 첫 번째 그룹에만 검색 바와 네비게이션 버튼 추가
                 if (index === 0) {
+                    const navButtons = document.createElement('div');
+                    navButtons.className = 'nav-buttons';
+                    navButtons.innerHTML = `
+                        <button class="nav-button" onclick="location.href='page1.html'">페이지 1</button>
+                        <button class="nav-button" onclick="location.href='page2.html'">페이지 2</button>
+                    `;
+                    
                     const searchContainer = document.createElement('div');
                     searchContainer.className = 'search-container';
                     searchContainer.innerHTML = `
                         <input type="text" id="searchInput" placeholder="닉네임으로 검색...">
                         <button id="searchButton">검색</button>
                     `;
+                    
                     section.appendChild(imageDiv);
+                    section.appendChild(navButtons);
                     section.appendChild(searchContainer);
                 } else {
                     section.appendChild(imageDiv);
