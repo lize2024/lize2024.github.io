@@ -27,6 +27,11 @@
             border-radius: 20px;
             overflow: hidden;
             aspect-ratio: 16 / 9;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+        .sponsor-image.visible {
+            opacity: 1;
         }
         .cover-image {
             width: 100%;
@@ -151,7 +156,7 @@
         .nav-button {
             width: auto;
             padding: 15px;
-            margin: 0 20%;
+            margin: 0 5%;
             font-size: 16px;
             background-color: white;
             color: black;
@@ -255,6 +260,27 @@
         countSpan.textContent = `${currentResultIndex + 1} / ${searchResults.length}`;
     }
 
+    function handleIntersection(entries, observer) {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+                observer.unobserve(entry.target);
+            }
+        });
+    }
+    
+    function setupIntersectionObserver() {
+        const options = {
+            root: null,
+            rootMargin: '0px',
+            threshold: 0.1
+        };
+    
+        const observer = new IntersectionObserver(handleIntersection, options);
+        const images = document.querySelectorAll('.sponsor-image');
+        images.forEach(img => observer.observe(img));
+    }
+    
     async function loadSponsors() {
         try {
             const response = await fetch('sponsors.json');
@@ -313,6 +339,7 @@
                 section.appendChild(table);
                 container.appendChild(section);
                 wrapNicknamesInSpan();
+                setupIntersectionObserver();
             });
 
             // 검색 기능 초기화
